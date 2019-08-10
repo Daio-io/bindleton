@@ -36,19 +36,19 @@ app.get('/bins', (_, res) => {
 
         let images1 = []
         $(firstImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('src')
+            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
             images1.push(image)
         })
 
         let images2 = []        
         $(secondImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('src')
+            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
             images2.push(image)
         })
 
         let images3 = []
         $(thirdImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('src')
+            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
             images3.push(image)
         })
 
