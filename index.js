@@ -2,19 +2,28 @@
 
 const config = Object.freeze({
     PORT: process.env.PORT || 3000,
-    CACHE: process.env.CACHE || 0
-  });
+    CACHE: process.env.CACHE || 0,
+    EMAIL: process.env.EMAIL || '',
+    CODE: process.env.CODE || ''
+});
 
 const http = require('http');
 const Express = require('express');
 const app = Express();
 const Browser = require('zombie');
-
+const shellJS = require('shelljs');
+const path = require('path');
+const appDir = path.dirname(require.main.filename);
 
 const cheerio = require('cheerio')
 
 app.get('/status', (_, res) => {
     res.send('OK')
+})
+
+app.get('/gym', (_, res) => {
+    const result = shellJS.exec(appDir + '/puregym.sh ' + config.EMAIL + ' ' + config.CODE)
+    res.json({ status: 'ok', inGym: result.trim() })
 })
 
 app.get('/bins', (_, res) => {
@@ -40,7 +49,7 @@ app.get('/bins', (_, res) => {
             images1.push(image)
         })
 
-        let images2 = []        
+        let images2 = []
         $(secondImages).find('img').each((index, item) => {
             let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
             images2.push(image)
@@ -55,19 +64,19 @@ app.get('/bins', (_, res) => {
         let result = {
             results: [
                 {
-                  text: first + " " + firstDate,
-                  date: firstDate,
-                  images: images1  
+                    text: first + " " + firstDate,
+                    date: firstDate,
+                    images: images1
                 },
                 {
-                  text: next + " " + secondDate,
-                  date: secondDate,
-                  images: images2  
+                    text: next + " " + secondDate,
+                    date: secondDate,
+                    images: images2
                 },
                 {
-                  text: third + " " + thirdDate,
-                  date: thirdDate,
-                  images: images3 
+                    text: third + " " + thirdDate,
+                    date: thirdDate,
+                    images: images3
                 }
             ]
         }
