@@ -14,6 +14,7 @@ const Browser = require('zombie');
 const shellJS = require('shelljs');
 const path = require('path');
 const appDir = path.dirname(require.main.filename);
+const html2json = require('html2json').html2json;
 
 const cheerio = require('cheerio')
 
@@ -45,19 +46,19 @@ app.get('/bins', (_, res) => {
 
         let images1 = []
         $(firstImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
+            let image = "https://www.salford.gov.uk" + $(item).attr('src')
             images1.push(image)
         })
 
         let images2 = []
         $(secondImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
+            let image = "https://www.salford.gov.uk" + $(item).attr('src')
             images2.push(image)
         })
 
         let images3 = []
         $(thirdImages).find('img').each((index, item) => {
-            let image = "https://www.salford.gov.uk" + $(item).attr('data-original')
+            let image = "https://www.salford.gov.uk" + $(item).attr('src')
             images3.push(image)
         })
 
