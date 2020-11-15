@@ -16,7 +16,11 @@ const path = require('path');
 const appDir = path.dirname(require.main.filename);
 const html2json = require('html2json').html2json;
 
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const tooly = require('tooly/tooly/tooly');
+
+const endpoint = 'https://thepiratesbay.io/search.php?query='
+const apikey = '3ec4931a9c'
 
 app.get('/status', (_, res) => {
     res.send('OK')
@@ -25,6 +29,69 @@ app.get('/status', (_, res) => {
 app.get('/gym', (_, res) => {
     const result = shellJS.exec(appDir + '/puregym.sh ' + config.EMAIL + ' ' + config.CODE)
     res.json({ status: 'ok', inGym: result.trim() })
+})
+
+app.get('/links', (rq, res) => {
+
+    let key = rq.query['apikey']
+    let query = rq.query['q']
+
+    if (!tooly.existy(key) || key !== apikey) {
+        res.json({ status: 'failed: missing apikey' })
+        return
+    }
+
+    if (!tooly.existy(query)) {
+        res.json({ status: 'failed: You must supply a `q` param' })
+        return
+    }
+
+
+    let b = new Browser()
+    b.visit(endpoint + query, { runScripts: true }, () => {
+        let $ = cheerio.load(b.html());
+
+        let para = $('tr')
+        let torrents = []
+
+        let tag = "Name"
+        para.each(function (i, elem) {
+            let url = $(elem).find('td').find('a').attr('href')
+            let meta = $('td[data-title="Name"]').attr('data-title')
+
+            let titles = []
+
+            if (meta === tag) {
+                let span = $(elem).find('span')
+                span.each(function (i, tag) {
+                    titles.push($(tag).text())
+                })
+
+            }
+
+
+            if (tooly.existy(url)) {
+                console.log(titles)
+
+                let data = {
+                    title: titles[0] || 'Unknown',
+                    subtitle: titles[1] || 'Unknown',
+                    torrent: url
+                }
+
+                torrents.push(data)
+            }
+        });
+
+        let result = {
+            results: torrents
+        }
+
+        res.json(result);
+
+        b.destroy();
+
+    });
 })
 
 app.get('/bins', (_, res) => {
