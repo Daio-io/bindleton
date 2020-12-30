@@ -28,7 +28,11 @@ app.get('/status', (_, res) => {
 
 app.get('/gym', (_, res) => {
     const result = shellJS.exec(appDir + '/puregym.sh ' + config.EMAIL + ' ' + config.CODE)
-    res.json({ status: 'ok', inGym: result.trim() })
+    res.json({
+        status: 'ok',
+        inGym: result.trim(),
+        numberInGym: tooly.inty(result.trim())
+    })
 })
 
 app.get('/links', (rq, res) => {
