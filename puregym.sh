@@ -34,9 +34,9 @@ appendData () {
 
   if [ -n "$numberOfPeople" ] && [ ! -n "$loginRequest" ]; then
     # echo $datetime, $numberOfPeople
-    echo numberOfPeople 
+    echo "$numberOfPeople" 
   else
-    echo 20
+    echo "<=20"
     if [ ! -f "$ERROR_LOG" ]; then touch "$ERROR_LOG"; fi
     echo -e "[ERROR] $datetime Unable to fetch data from PureGym. Reason: \n$loginRequest" >> "$ERROR_LOG"
   fi
