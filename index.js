@@ -79,11 +79,11 @@ app.get('/links', (rq, res) => {
                 }
             })
 
-            let result = {
+            let reso = {
                 results: data
             }
 
-            res.json(result)
+            res.json(reso)
             b.destroy();
         } catch (ex) {
             res.send(ex)
