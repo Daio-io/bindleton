@@ -7,6 +7,8 @@ const config = Object.freeze({
     CODE: process.env.CODE || ''
 });
 
+const tabletojson = require('tabletojson').Tabletojson;
+
 const http = require('http');
 const Express = require('express');
 const app = Express();
@@ -19,7 +21,7 @@ const html2json = require('html2json').html2json;
 const cheerio = require('cheerio');
 const tooly = require('tooly/tooly/tooly');
 
-const endpoint = 'https://thepiratesbay.io/search.php?query='
+const endpoint = 'https://thepiratebay.by/search.php?q='
 const apikey = '3ec4931a9c'
 
 app.get('/status', (_, res) => {
@@ -51,49 +53,83 @@ app.get('/links', (rq, res) => {
     }
 
 
+    let endpoint = `https://thepiratebay.party/search/${query}/1/99/0`
     let b = new Browser()
-    b.visit(endpoint + query, { runScripts: true }, () => {
+    b.visit(endpoint, { runScripts: true }, () => {
         let $ = cheerio.load(b.html());
 
-        let para = $('tr')
-        let torrents = []
+        const result = tabletojson.convert(b.html(), { stripHtmlFromCells: false })
 
-        let tag = "Name"
-        para.each(function (i, elem) {
-            let url = $(elem).find('td').find('a').attr('href')
-            let meta = $('td[data-title="Name"]').attr('data-title')
-
-            let titles = []
-
-            if (meta === tag) {
-                let span = $(elem).find('span')
-                span.each(function (i, tag) {
-                    titles.push($(tag).text())
+        try {
+            let data = result[0].map(function (item) {
+                let magnet = $(item['3']).find('a').attr('href')
+                var title = ''
+                Object.keys(item).forEach(function (key) {
+                    if (key.toLowerCase().includes('name')) {
+                        title = $(item[key]).attr('title')
+                    }
                 })
 
-            }
+                let size = item['Size']
 
-
-            if (tooly.existy(url)) {
-                console.log(titles)
-
-                let data = {
-                    title: titles[0] || 'Unknown',
-                    subtitle: titles[1] || 'Unknown',
-                    torrent: url
+                return {
+                    torrent: magnet,
+                    title: title,
+                    subtitle: size
                 }
+            })
 
-                torrents.push(data)
-            }
-        });
-
-        let result = {
-            results: torrents
+            res.json(data)
+            b.destroy();
+        } catch (ex) {
+            res.send(ex)
+            b.destroy();
         }
 
-        res.json(result);
+        
 
-        b.destroy();
+        // res.json()
+        // let para = $('.list-entry')
+        // res.send(para.html())
+
+        // let torrents = []
+
+        // let tag = "Name"
+        // para.each(function (i, elem) {
+        //     let url = $(elem).find('td').find('a').attr('href')
+        //     let meta = $('td[data-title="Name"]').attr('data-title')
+
+        //     let titles = []
+
+        //     if (meta === tag) {
+        //         let span = $(elem).find('span')
+        //         span.each(function (i, tag) {
+        //             titles.push($(tag).text())
+        //         })
+
+        //     }
+
+
+        //     if (tooly.existy(url)) {
+        //         console.log(titles)
+
+        //         let data = {
+        //             title: titles[0] || 'Unknown',
+        //             subtitle: titles[1] || 'Unknown',
+        //             torrent: url
+        //         }
+
+        //         torrents.push(data)
+        //     }
+        // });
+
+        // let result = {
+        //     results: torrents
+        // }
+
+        // res.json(result);
+
+        // b.destroy();
 
     });
 })
