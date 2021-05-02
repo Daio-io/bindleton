@@ -18,6 +18,9 @@ const path = require('path');
 const appDir = path.dirname(require.main.filename);
 const html2json = require('html2json').html2json;
 
+const sharp = require('sharp');
+const got = require('got');
+
 const cheerio = require('cheerio');
 const tooly = require('tooly/tooly/tooly');
 
@@ -34,6 +37,39 @@ app.get('/gym', (_, res) => {
         status: 'ok',
         inGym: result.trim(),
         numberInGym: tooly.inty(result.trim())
+    })
+})
+
+
+app.get("/image", (rq, res) => {
+
+    let url = rq.query['url']
+    let width = tooly.inty(rq.query['width'])
+    let height = tooly.inty(rq.query['height'])
+
+    let w = width > 0 ? width : null
+    let h = height > 0 ? height : null
+
+    let resizeOptions = { width: w, height: h }
+
+    const bufferPromise = got(url, { timeout: 5000 }).buffer()
+    bufferPromise.then((buffer) => {
+        sharp(buffer)
+            .resize(resizeOptions)
+            .webp({ quality: 80 })
+            .toBuffer()
+            .then((data) => {
+                res.set('Content-Type', 'image/webp')
+                res.status(200).end(data)
+            }).catch(ex => {
+                console.log(ex)
+                res.set('Content-Type', 'image/webp')
+                res.status(404).end()
+            })
+    }).catch(ex => {
+        console.log(ex)
+        res.set('Content-Type', 'image/webp')
+        res.status(404).end()
     })
 })
 
@@ -90,7 +126,7 @@ app.get('/links', (rq, res) => {
             b.destroy();
         }
 
-        
+
 
         // res.json()
         // let para = $('.list-entry')
