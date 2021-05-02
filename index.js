@@ -60,6 +60,7 @@ app.get("/image", (rq, res) => {
             .toBuffer()
             .then((data) => {
                 res.set('Content-Type', 'image/webp')
+                res.set('Cache-Control', 'public, max-age=2592000, immutable')
                 res.status(200).end(data)
             }).catch(ex => {
                 console.log(ex)
