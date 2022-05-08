@@ -16,7 +16,8 @@ const path = require('path');
 const appDir = path.dirname(require.main.filename);
 const html2json = require('html2json').html2json;
 
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const { lookup } = require('dns');
 
 app.get('/status', (_, res) => {
     res.send('OK')
@@ -89,8 +90,99 @@ app.get('/bins', (_, res) => {
 
 })
 
+
+const imgLookup = {
+    'grey': 'https://www.bury.gov.uk/bury/images/burySystemImages/BinCollectionInformation/bin-grey-web.jpg',
+    'brown': 'https://www.bury.gov.uk/bury/images/burySystemImages/BinCollectionInformation/bin-brown-web.jpg',
+    'green': 'https://www.bury.gov.uk/bury/images/burySystemImages/BinCollectionInformation/green-bin-small.jpg',
+    'blue': 'https://www.bury.gov.uk/bury/images/burySystemImages/BinCollectionInformation/bin-blue-web.jpg'
+}
+
+app.get('/prestbins', (_, res) => {
+    const b = new Browser();
+    b.visit("https://www.bury.gov.uk/index.aspx?articleid=10493&RId=662194&pc=m25%209gj&hn=144&sr=&hn2=", { runScripts: true }, () => {
+        let $ = cheerio.load(b.html())
+
+        let resultsObj = {
+
+        }
+
+        $('.binRouteDetails').first().find('ul').find('li').each((index, item) => {
+
+            const dateText = $(item).find('strong').first().text()
+            var image = ''
+            var color = ''
+            var text = $(item).text()
+
+            if (text.includes('grey')) {
+                image = imgLookup['grey']
+                color = 'grey'
+                text = 'grey waste bin'
+            }
+            else if (text.includes('blue')) {
+                image = imgLookup['blue']
+                color = 'blue'
+                text = 'blue bin'
+            }
+            else if (text.includes('brown')) {
+                image = imgLookup['brown']
+                color = 'brown'
+
+                text = 'brown bin'
+            }
+            else if (text.includes('green')) {
+                image = imgLookup['green']
+
+                color = 'green'
+                text = 'green bin'
+            }
+            else {
+                text = ''
+                color = ''
+            }
+
+            if (resultsObj[dateText]) {
+                resultsObj[dateText].text = resultsObj[dateText].text + ' and ' + text
+                resultsObj[dateText].images.push(image)
+                resultsObj[dateText].colors.push(color)
+            }
+            else if (text !== '')
+            resultsObj[dateText] = {
+                    text: 'Next collection on ' + dateText + ' will be ' + text,
+                    date: dateText,
+                    images: [image],
+                    colors: [color]
+                }
+        })
+
+        const results = []
+
+        for (let [key, value] of Object.entries(resultsObj)) {
+            results.push(value)
+        }
+
+        // let currentMonth = $('.monthTable').first()
+        // let date = $(currentMonth).find('caption').first().text().trim()
+
+        // $(currentMonth).find('.DateCol').each((index, item) => {
+        //     console.log($(item).text())
+        // })
+
+        // $(currentMonth).find('.BinCol').each((index, item) => {
+        //     $(item).find('img').each((index, img) => {
+        //         console.log($(img).attr('src'))
+        //     })
+        // })
+
+
+        res.json({ results: results });
+
+        b.destroy();
+    })
+})
+
 const server = http.createServer(app);
 
 server.listen(config.PORT, () => {
     console.log('Bins started on:', config.PORT);
-});
+})
