@@ -11,9 +11,13 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
+    "got": "^11.8.2",
     "html2json": "^1.0.2",
     "save": "^2.4.0",
+    "sharp": "^0.28.1",
     "shelljs": "^0.8.3",
+    "tabletojson": "^2.0.4",
+    "tooly": "git+https://github.com/Daio-io/tooly.git",
     "zombie": "^6.1.4"
   }
 }
