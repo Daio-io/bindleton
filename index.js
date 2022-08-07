@@ -329,6 +329,47 @@ app.get('/prestbins', (_, res) => {
     })
 })
 
+const Nintendo = {
+    "sega": "https://en.wikipedia.org/wiki/Category:Nintendo_Switch_Online_Sega_Genesis_games",
+    "nes": "https://en.wikipedia.org/wiki/Category:Nintendo_Switch_Online_NES_games",
+    "snes": "https://en.wikipedia.org/wiki/Category:Nintendo_Switch_Online_SNES_games",
+    "n64": "https://en.wikipedia.org/wiki/Category:Nintendo_Switch_Online_Nintendo_64_games"
+}
+
+app.get('/nintendo/games/:console', (req, res) => {
+    const b = new Browser();
+    const console = req.params.console
+    const url = Nintendo[console]
+
+    if (!tooly.existy(url)) {
+        res.status = 404
+        res.json({ status: "failed", console: "", games: [] })
+        return
+    }
+
+    b.visit(url, { runScripts: false, silent: true }, () => {
+        let $ = cheerio.load(b.html())
+
+        const results = []
+
+        $('#mw-pages > div > div').find("ul").find("li").find("a").each((index, item) => {
+            results.push($(item).attr('title'))
+        })
+
+        res.json({ 
+            status: 'success',
+            console: console,
+            games: results 
+        });
+
+        b.destroy();
+    })
+})
+
+
+
+
+
 const server = http.createServer(app);
 
 server.listen(config.PORT, () => {
