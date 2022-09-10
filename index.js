@@ -246,10 +246,10 @@ const imgLookup = {
     'blue': 'https://www.bury.gov.uk/bury/images/burySystemImages/BinCollectionInformation/bin-blue-web.jpg'
 }
 
+const binsBrowser = new Browser();
 app.get('/prestbins', (_, res) => {
-    const b = new Browser();
-    b.visit("https://www.bury.gov.uk/index.aspx?articleid=10493&RId=662194&pc=m25%209gj&hn=144&sr=&hn2=", { runScripts: true }, () => {
-        let $ = cheerio.load(b.html())
+    binsBrowser.visit("https://www.bury.gov.uk/index.aspx?articleid=10493&RId=662194&pc=m25%209gj&hn=144&sr=&hn2=", { runScripts: true }, () => {
+        let $ = cheerio.load(binsBrowser.html())
 
         let resultsObj = {
 
@@ -295,7 +295,7 @@ app.get('/prestbins', (_, res) => {
                 resultsObj[dateText].colors.push(color)
             }
             else if (text !== '')
-            resultsObj[dateText] = {
+                resultsObj[dateText] = {
                     text: 'Next collection on ' + dateText + ' will be ' + text,
                     date: dateText,
                     images: [image],
@@ -324,8 +324,6 @@ app.get('/prestbins', (_, res) => {
 
 
         res.json({ results: results });
-
-        b.destroy();
     })
 })
 
@@ -356,10 +354,10 @@ app.get('/nintendo/games/:console', (req, res) => {
             results.push($(item).attr('title'))
         })
 
-        res.json({ 
+        res.json({
             status: 'success',
             console: console,
-            games: results 
+            games: results
         });
 
         b.destroy();
