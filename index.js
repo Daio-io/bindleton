@@ -258,6 +258,8 @@ app.get('/prestbins', (_, res) => {
         $('.binRouteDetails').first().find('ul').find('li').each((index, item) => {
 
             const dateText = $(item).find('strong').first().text()
+
+            const date = Date.parse(dateText)
             var image = ''
             var color = ''
             var text = $(item).text()
@@ -298,6 +300,7 @@ app.get('/prestbins', (_, res) => {
                 resultsObj[dateText] = {
                     text: 'Next collection on ' + dateText + ' will be ' + text,
                     date: dateText,
+                    timeStamp: date,
                     images: [image],
                     colors: [color]
                 }
@@ -308,6 +311,8 @@ app.get('/prestbins', (_, res) => {
         for (let [key, value] of Object.entries(resultsObj)) {
             results.push(value)
         }
+
+        results.sort(function(a, b){return a.timeStamp - b.timeStamp});
 
         // let currentMonth = $('.monthTable').first()
         // let date = $(currentMonth).find('caption').first().text().trim()
