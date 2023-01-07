@@ -11,7 +11,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
-    "got": "^11.8.2",
+    "got": "^11.8.5",
     "html2json": "^1.0.2",
     "save": "^2.4.0",
     "sharp": "^0.28.1",
